@@ -37,19 +37,57 @@
     var iconSize = new OpenLayers.Size(25, 25);
     var layerName = [];
 
-    for (var i = 0; i < markers.length; i++) {
-      var group = markers[i][2];
-      var lonLat = new OpenLayers.LonLat(markers[i][0], markers[i][1]).transform(epsg4326, projectTo);
+    function createMarker(group, lon, lat, map) {
+      var lonLat = new OpenLayers.LonLat(lon, lat).transform(epsg4326, projectTo);
 
       if (!layerName.includes(group)) {
-        // Create a new layer for each group
         layerName.push(group);
         map.addLayer(new OpenLayers.Layer.Markers(group));
       }
 
       var icon = new OpenLayers.Icon('./markers/' + group.toLowerCase() + '-marker.png', iconSize, null, 0);
       var marker = new OpenLayers.Marker(lonLat, icon);
+
+      var popupContent;
+      switch (group) {
+        case 'Cities1':
+          popupContent = 'knight';
+          break;
+        case 'Cities2':
+          popupContent = 'queen';
+          break;
+        case 'Cities3':
+          popupContent = 'rook';
+          break;
+        default:
+          popupContent = 'Default Popup';
+          break;
+      }
+
+      var popup = new OpenLayers.Popup.FramedCloud("Popup", 
+        lonLat,
+        null,
+        popupContent,
+        null,
+        true
+      );
+
+      marker.events.register("mouseover", marker, function() {
+        map.addPopup(popup);
+      });
+
+      marker.events.register("mouseout", marker, function() {
+        map.removePopup(popup);
+      });
+
       map.getLayersByName(group)[0].addMarker(marker);
+    }
+
+    for (var i = 0; i < markers.length; i++) {
+      var group = markers[i][2];
+      var lon = markers[i][0];
+      var lat = markers[i][1];
+      createMarker(group, lon, lat, map);
     }
 
     map.setCenter(new OpenLayers.LonLat(8.0, 50.3).transform(epsg4326, projectTo), 7);
