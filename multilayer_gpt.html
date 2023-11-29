@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multi-Layer Map</title>
+  <!-- Include Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+  <style>
+    #map {
+      height: 400px;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+
+  <!-- Include Leaflet JavaScript -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+  
+  <script>
+    // Create the map centered around a specific location
+    const myMap = L.map('map').setView([40.7128, -74.0060], 12);
+
+    // Add OpenStreetMap as the base layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(myMap);
+
+    // Example: Add a custom vector layer (e.g., a polyline)
+    const polyline = L.polyline([
+      [40.7128, -74.0060], // NYC
+      [34.0522, -118.2437], // Los Angeles
+      [37.7749, -122.4194], // San Francisco
+    ], { color: 'blue' }).addTo(myMap);
+  </script>
+</body>
+</html>

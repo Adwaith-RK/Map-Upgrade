@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>OpenLayers Custom Marker Groups Example</title>
+  <link rel="stylesheet" href="http://www.openlayers.org/api/theme/default/style.css" type="text/css">
+</head>
+<body>
+  <div id="mapdiv" style="width: 100%; height: 500px;"></div>
+  
+  <script src="http://www.openlayers.org/api/OpenLayers.js"></script>
+  <script>
+    epsg4326 = new OpenLayers.Projection("EPSG:4326");
+
+    var map = new OpenLayers.Map("mapdiv");
+    map.addLayer(new OpenLayers.Layer.OSM());
+
+    map.addControls([
+      new OpenLayers.Control.MousePosition(),
+      new OpenLayers.Control.ScaleLine(),
+      new OpenLayers.Control.LayerSwitcher(),
+      new OpenLayers.Control.Permalink({ anchor: true })
+    ]);
+
+    var projectTo = map.getProjectionObject();
+
+    var markers = [
+      [9.2, 48.8, 'Cities1'],
+      [8.4, 49.0, 'Cities1'],
+      [6.2, 48.7, 'Cities1'],
+      [2.5, 48.9, 'Cities2'],
+      [-1.4, 50.9, 'Cities2'],
+      [6.6, 51.8, 'Cities3'],
+      [8.6, 49.4, 'Cities3'],
+      [11.6, 48.1, 'Cities3']
+    ];
+
+    var iconSize = new OpenLayers.Size(25, 25);
+    var layerName = [];
+
+    for (var i = 0; i < markers.length; i++) {
+      var group = markers[i][2];
+      var lonLat = new OpenLayers.LonLat(markers[i][0], markers[i][1]).transform(epsg4326, projectTo);
+
+      if (!layerName.includes(group)) {
+        // Create a new layer for each group
+        layerName.push(group);
+        map.addLayer(new OpenLayers.Layer.Markers(group));
+      }
+
+      var icon = new OpenLayers.Icon('./markers/' + group.toLowerCase() + '-marker.png', iconSize, null, 0);
+      var marker = new OpenLayers.Marker(lonLat, icon);
+      map.getLayersByName(group)[0].addMarker(marker);
+    }
+
+    map.setCenter(new OpenLayers.LonLat(8.0, 50.3).transform(epsg4326, projectTo), 7);
+  </script>
+</body>
+</html>

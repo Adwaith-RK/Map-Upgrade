@@ -1,0 +1,108 @@
+<html>
+<head>
+  <title>Openlayers Marker Array Multilayer Example</title>
+</head>
+<body>
+  <div id="mapdiv"></div>
+
+  <script src="http://www.openlayers.org/api/OpenLayers.js"></script>
+  <script>
+    epsg4326 = new OpenLayers.Projection("EPSG:4326");
+    map = new OpenLayers.Map({
+      div: "mapdiv",
+      displayProjection: epsg4326
+    });
+    map.addLayer(new OpenLayers.Layer.OSM());
+    map.addControls([
+      new OpenLayers.Control.MousePosition(),
+      new OpenLayers.Control.ScaleLine(),
+      new OpenLayers.Control.LayerSwitcher(),
+      new OpenLayers.Control.Permalink({ anchor: true })
+    ]);
+
+    projectTo = map.getProjectionObject();
+    var lonLat = new OpenLayers.LonLat(8.0, 50.3).transform(epsg4326, projectTo);
+    var zoom = 7;
+    if (!map.getCenter()) {
+      map.setCenter(lonLat, zoom);
+    }
+
+    var markers = [
+      [9.2, 48.8, 'Cities1'],
+      [8.4, 49.0, 'Cities1'],
+      [6.2, 48.7, 'Cities1'],
+      [2.5, 48.9, 'Cities2'],
+      [-1.4, 50.9, 'Cities2'],
+      [6.6, 51.8, 'Cities3'],
+      [8.6, 49.4, 'Cities3'],
+      [11.6, 48.1, 'Cities3']
+    ];
+
+    var colorList = {"Cities1": "red", "Cities2": "blue", "Cities3": "green"};
+    
+    var vectorLayers = {};
+    var polylineLayers = {};
+
+    for (var i = 0; i < markers.length; i++) {
+      addMarker(markers[i], colorList[markers[i][2]]);
+    }
+
+    for (var i = 0; i < markers.length - 1; i++) {
+      // Only connect consecutive markers within the same group
+      if (markers[i][2] === markers[i + 1][2]) {
+        addPolyline(markers[i], markers[i + 1], colorList[markers[i][2]]);
+      }
+    }
+
+    function addMarker(marker, color) {
+      var lon = marker[0];
+      var lat = marker[1];
+      var vectorFeature = new OpenLayers.Feature.Vector(
+        new OpenLayers.Geometry.Point(lon, lat).transform(epsg4326, projectTo),
+        { description: "marker number " + i }
+      );
+
+      if (!vectorLayers[marker[2]]) {
+        vectorLayers[marker[2]] = new OpenLayers.Layer.Vector(marker[2], {
+          styleMap: new OpenLayers.StyleMap({
+            pointRadius: 6,
+            fillColor: color,
+            fillOpacity: 0.5
+          })
+        });
+        map.addLayer(vectorLayers[marker[2]]);
+      }
+
+      vectorLayers[marker[2]].addFeatures(vectorFeature);
+    }
+
+    function addPolyline(marker1, marker2, color) {
+      var lon1 = marker1[0];
+      var lat1 = marker1[1];
+      var lon2 = marker2[0];
+      var lat2 = marker2[1];
+
+      var points = new OpenLayers.Geometry.Point(lon1, lat1).transform(epsg4326, projectTo);
+      var pointsArray = [points];
+      pointsArray.push(new OpenLayers.Geometry.Point(lon2, lat2).transform(epsg4326, projectTo));
+
+      var line = new OpenLayers.Geometry.LineString(pointsArray);
+
+      var polylineFeature = new OpenLayers.Feature.Vector(line, { description: "polyline number " + i });
+
+      if (!polylineLayers[marker1[2]]) {
+        polylineLayers[marker1[2]] = new OpenLayers.Layer.Vector(marker1[2] + ' Polylines', {
+          styleMap: new OpenLayers.StyleMap({
+            strokeColor: color,
+            strokeWidth: 2,
+            strokeOpacity: 0.7
+          })
+        });
+        map.addLayer(polylineLayers[marker1[2]]);
+      }
+
+      polylineLayers[marker1[2]].addFeatures(polylineFeature);
+    }
+  </script>
+</body>
+</html>
