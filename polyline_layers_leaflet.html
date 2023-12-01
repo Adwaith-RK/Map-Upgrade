@@ -50,6 +50,9 @@
       markerProps: {}
     }).addTo(map);
 
+    // Add OpenStreetMap as the default selected map
+    map.addLayer(openStreetMapLayer);
+
     var markers = [
       [48.8, 9.2, 'Cities1'],
       [49.0, 8.4, 'Cities1'],
