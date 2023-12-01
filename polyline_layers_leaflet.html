@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Leaflet Marker Array Multilayer Example</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    #mapdiv {
+      height: 600px;
+    }
+  </style>
+</head>
+<body>
+  <div id="mapdiv"></div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.coordinates/dist/Leaflet.Coordinates-0.1.5.src.js"></script>
+  <script>
+    var map = L.map('mapdiv').setView([50.3, 8.0], 7);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Add coordinates control
+    L.control.coordinates({
+      position: "bottomright", // optional default "bootomright"
+      decimals: 4, // optional default 4
+      decimalSeperator: ".", // optional default "."
+      labelTemplateLat: "Latitude: {y}", // optional default "Lat: {y}"
+      labelTemplateLng: "Longitude: {x}", // optional default "Lng: {x}"
+      enableUserInput: true, // optional default true
+      useDMS: false, // optional default false
+      useLatLngOrder: true, // ordering of labels, default false-> lng-lat
+      markerType: L.marker, // optional default L.marker
+      markerProps: {} // optional default {},
+    }).addTo(map);
+
+    var markers = [
+      [48.8, 9.2, 'Cities1'],
+      [49.0, 8.4, 'Cities1'],
+      [48.7, 6.2, 'Cities1'],
+      [48.9, 2.5, 'Cities2'],
+      [50.9, -1.4, 'Cities2'],
+      [51.8, 6.6, 'Cities3'],
+      [49.4, 8.6, 'Cities3'],
+      [48.1, 11.6, 'Cities3']
+    ];
+
+    var colorList = {"Cities1": "red", "Cities2": "blue", "Cities3": "green"};
+
+    var vectorLayers = {};
+    var polylineLayers = {};
+
+    for (var i = 0; i < markers.length; i++) {
+      addMarker(markers[i], colorList[markers[i][2]]);
+    }
+
+    for (var i = 0; i < markers.length - 1; i++) {
+      // Only connect consecutive markers within the same group
+      if (markers[i][2] === markers[i + 1][2]) {
+        addPolyline(markers[i], markers[i + 1], colorList[markers[i][2]]);
+      }
+    }
+
+    function addMarker(marker, color) {
+      var lat = marker[0];
+      var lon = marker[1];
+
+      var markerOptions = {
+        radius: 6,
+        fillColor: color,
+        fillOpacity: 0.5
+      };
+
+      var markerLayer = L.circleMarker([lat, lon], markerOptions);
+
+      if (!vectorLayers[marker[2]]) {
+        vectorLayers[marker[2]] = L.layerGroup().addTo(map);
+      }
+
+      vectorLayers[marker[2]].addLayer(markerLayer);
+    }
+
+    function addPolyline(marker1, marker2, color) {
+      var lat1 = marker1[0];
+      var lon1 = marker1[1];
+      var lat2 = marker2[0];
+      var lon2 = marker2[1];
+
+      var polylineOptions = {
+        color: color,
+        weight: 2,
+        opacity: 0.7
+      };
+
+      var polylineLayer = L.polyline([[lat1, lon1], [lat2, lon2]], polylineOptions);
+
+      if (!polylineLayers[marker1[2]]) {
+        polylineLayers[marker1[2]] = L.layerGroup().addTo(map);
+      }
+
+      polylineLayers[marker1[2]].addLayer(polylineLayer);
+    }
+  </script>
+</body>
+</html>
